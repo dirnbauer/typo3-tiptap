@@ -99,6 +99,7 @@ editor:
         - path: '@typo3-tiptap/tiptap/plugins/strikethrough.js'
         - path: '@typo3-tiptap/tiptap/plugins/link.js'
         - path: '@typo3-tiptap/tiptap/plugins/abbreviation.js'
+        - path: '@typo3-tiptap/tiptap/plugins/language.js'
         - path: '@typo3-tiptap/tiptap/plugins/list.js'
           config:
             types: ['ordered', 'bullet']
@@ -195,6 +196,10 @@ For frontend tooltip styling, include:
 ```typoscript
 page.includeCSS.tiptapAbbreviationTooltip = EXT:typo3_tiptap/Resources/Public/Css/AbbreviationTooltip.css
 ```
+
+### Language spans
+
+The shipped preset also includes a `Language` button for marking words or sentences with a language tag. It stores semantic `<span lang="…">` markup and also writes `xml:lang` for XHTML-oriented consumers.
 
 ## Documentation
 

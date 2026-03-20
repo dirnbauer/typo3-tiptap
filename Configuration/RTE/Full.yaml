@@ -14,6 +14,7 @@ editor:
         - path: "@typo3-tiptap/tiptap/plugins/strikethrough.js"
         - path: "@typo3-tiptap/tiptap/plugins/link.js"
         - path: "@typo3-tiptap/tiptap/plugins/abbreviation.js"
+        - path: "@typo3-tiptap/tiptap/plugins/language.js"
         - path: "@typo3-tiptap/tiptap/plugins/list.js"
           config:
             types: [ "ordered", "bullet" ]

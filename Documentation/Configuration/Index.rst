@@ -31,5 +31,6 @@ The shipped preset includes an abbreviation plugin:
         config:
           plugins:
             - path: "@typo3-tiptap/tiptap/plugins/abbreviation.js"
+            - path: "@typo3-tiptap/tiptap/plugins/language.js"
 
-The plugin stores semantic ``<abbr>`` markup with ``title`` and ``data-tooltip`` attributes.
+The abbreviation plugin stores semantic ``<abbr>`` markup with ``title`` and ``data-tooltip`` attributes. The language plugin stores semantic ``<span lang="...">`` markup and mirrors the value to ``xml:lang``.

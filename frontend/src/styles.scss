@@ -165,6 +165,13 @@
     text-decoration: underline dotted;
     text-underline-offset: 0.15em;
   }
+
+  span[lang],
+  span[xml\:lang] {
+    text-decoration: underline dashed;
+    text-decoration-color: color-mix(in hsl, currentColor 35%, transparent);
+    text-underline-offset: 0.15em;
+  }
 }
 
 .tiptap-dropdown {

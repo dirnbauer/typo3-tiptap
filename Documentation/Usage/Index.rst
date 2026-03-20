@@ -22,3 +22,10 @@ If the website should render styled hover tooltips, include the shipped styleshe
 ..  code-block:: typoscript
 
     page.includeCSS.tiptapAbbreviationTooltip = EXT:typo3_tiptap/Resources/Public/Css/AbbreviationTooltip.css
+
+Language spans
+==============
+
+The default preset also contains a language command. Select a word or sentence, click :guilabel:`Language`, and enter a BCP 47 language tag such as ``en``, ``fr`` or ``de-AT``.
+
+The editor writes semantic ``<span lang="...">`` markup and mirrors the value to ``xml:lang``.
