@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<guides xmlns="https://www.phpdoc.org/guides" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://www.phpdoc.org/guides https://docs.typo3.org/render-guides/guides.xsd">
+    <project title="TYPO3 TipTap" version="0.0.16"/>
+    <extension name="typo3_tiptap"/>
+</guides>

@@ -9,12 +9,16 @@ use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use TYPO3\CMS\Backend\Form\NodeResolverInterface;
 
 #[Autoconfigure(public: true)]
-class RteNodeResolver implements NodeResolverInterface
+final class RteNodeResolver implements NodeResolverInterface
 {
-    public function __construct(protected array $data = [])
-    {
-    }
+    /**
+     * @var array<string, mixed>
+     */
+    protected array $data = [];
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function setData(array $data): void
     {
         $this->data = $data;
@@ -22,10 +26,15 @@ class RteNodeResolver implements NodeResolverInterface
 
     /**
      * Returns RichTextElement as class name if RTE widget should be rendered.
+     *
+     * @return class-string<TipTapTextElement>|null
      */
     public function resolve(): ?string
     {
-        $parameterArray = $this->data['parameterArray'];
+        $parameterArray = $this->data['parameterArray'] ?? null;
+        if (!is_array($parameterArray)) {
+            return null;
+        }
 
         if ($this->shouldRenderRichtext($parameterArray) === false) {
             return null;
@@ -34,9 +43,17 @@ class RteNodeResolver implements NodeResolverInterface
         return TipTapTextElement::class;
     }
 
+    /**
+     * @param array<string, mixed> $parameterArray
+     */
     private function shouldRenderRichtext(array $parameterArray): bool
     {
-        $config = $parameterArray['fieldConf']['config'] ?? null;
+        $fieldConfiguration = $parameterArray['fieldConf'] ?? null;
+        if (!is_array($fieldConfiguration)) {
+            return false;
+        }
+
+        $config = $fieldConfiguration['config'] ?? null;
         if (!is_array($config)) {
             return false;
         }

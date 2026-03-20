@@ -1,36 +1,43 @@
-# Tip Tap
+# Local Setup
 
 ## Requirements
 
-* having Docker installed locally (see https://docs.docker.com/get-docker/)
-* having DDEV installed locally (see https://ddev.readthedocs.io/en/stable/#installation)
+- Docker
+- DDEV
 
-## Initialization
+## Bootstrap
 
 ```sh
 ddev start
-ddev init
-ddev pull assets
+ddev composer update
+cd frontend && npm ci && npm run build && cd ..
 ```
 
-## Credentials
+## Quality Checks
+
+```sh
+ddev composer phpstan
+ddev composer test:unit
+```
+
+## Demo Instance
 
 - Backend: https://typo3-tiptap.ddev.site/typo3
 - Username: `admin`
 - Password: `John3:16`
 
-### Downloading database and files
+## Assets and Database
+
+Download project assets:
 
 ```sh
-# HEADS UP: All files in the local `public/fileadmin/` will be overridden, that means:
-# all files that are not present in `data/files/public/fileadmin/` will be deleted from fileadmin
 ddev pull assets
 ```
 
-### Update local database and files
+Push local changes back to the asset store:
 
 ```sh
-# HEADS UP: All files in the local `data/files/public/fileadmin/` will be overridden, that means:
-# all files that are not present in `public/fileadmin/` will be deleted from fileadmin
 ddev push assets
 ```
+
+When testing workspace scenarios, enable `EXT:workspaces` in the local instance and verify draft editing with newly uploaded files instead of overwriting existing files in place.

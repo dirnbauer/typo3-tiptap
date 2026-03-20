@@ -23,8 +23,6 @@ use TYPO3\CMS\Backend\Controller\AbstractLinkBrowserController;
 use TYPO3\CMS\Core\Configuration\Richtext;
 use TYPO3\CMS\Core\LinkHandling\Exception\UnknownLinkHandlerException;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
-use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
@@ -37,32 +35,53 @@ use TYPO3\CMS\Core\View\ViewInterface;
  * @internal This is a specific Backend Controller implementation and is not considered part of the Public TYPO3 API.
  */
 #[Autoconfigure(public: true, shared: false)]
-class BrowseLinksController extends AbstractLinkBrowserController
+final class BrowseLinksController extends AbstractLinkBrowserController
 {
-    protected string $editorId;
+    protected string $editorId = '';
 
     /**
      * TYPO3 language code of the content language
      */
-    protected string $contentsLanguage;
-    protected ?LanguageService $contentLanguageService;
+    protected string $contentsLanguage = '';
+
+    /**
+     * @var array<string, mixed>
+     */
     protected array $buttonConfig = [];
+
+    /**
+     * @var array<string, mixed>
+     */
     protected array $thisConfig = [];
+
+    /**
+     * @var array<string, string>
+     */
     protected array $classesAnchorDefault = [];
+
+    /**
+     * @var array<string, string>
+     */
     protected array $classesAnchorDefaultTarget = [];
+
+    /**
+     * @var array<string, string>
+     */
     protected array $classesAnchorJSOptions = [];
+
     protected string $defaultLinkTarget = '';
     protected string $siteUrl = '';
 
     public function __construct(
         protected readonly LinkService $linkService,
         protected readonly Richtext $richtext,
-        protected readonly LanguageServiceFactory $languageServiceFactory,
         protected readonly FlashMessageService $flashMessageService,
     ) {}
 
     /**
      * This is only used by RTE currently.
+     *
+     * @return array<string, mixed>
      */
     public function getConfiguration(): array
     {
@@ -70,13 +89,17 @@ class BrowseLinksController extends AbstractLinkBrowserController
     }
 
     /**
-     * @return array{act: string, P: array, editorId: string, contentsLanguage: string} Array of parameters which have to be added to URLs
+     * @param array<string, mixed>|null $overrides
+     * @return array{act: string, P: array<string, mixed>, editorId: string, contentsLanguage: string}
      */
     public function getUrlParameters(?array $overrides = null): array
     {
+        $act = is_string($overrides['act'] ?? null) ? $overrides['act'] : $this->displayedLinkHandlerId;
+        $parameters = is_array($overrides['P'] ?? null) ? $overrides['P'] : $this->parameters;
+
         return [
-            'act' => $overrides['act'] ?? $this->displayedLinkHandlerId,
-            'P' => $overrides['P'] ?? $this->parameters,
+            'act' => $act,
+            'P' => $parameters,
             'editorId' => $this->editorId,
             'contentsLanguage' => $this->contentsLanguage,
         ];
@@ -98,24 +121,33 @@ class BrowseLinksController extends AbstractLinkBrowserController
     protected function initVariables(ServerRequestInterface $request): void
     {
         parent::initVariables($request);
+
+        /** @var array<string, mixed> $queryParameters */
         $queryParameters = $request->getQueryParams();
-        $this->siteUrl = $request->getAttribute('normalizedParams')->getSiteUrl();
-        $this->currentLinkParts = $queryParameters['P']['curUrl'] ?? [];
-        $this->editorId = $queryParameters['editorId'] ?? '';
-        $this->contentsLanguage = $queryParameters['contentsLanguage'] ?? '';
-        $this->contentLanguageService = $this->languageServiceFactory->create($this->contentsLanguage);
+        $normalizedParams = $request->getAttribute('normalizedParams');
+        $this->siteUrl = is_object($normalizedParams) && method_exists($normalizedParams, 'getSiteUrl')
+            ? (string)$normalizedParams->getSiteUrl()
+            : '';
+        $queryParameterPayload = is_array($queryParameters['P'] ?? null) ? $queryParameters['P'] : [];
+        $currentLinkParts = $queryParameterPayload['curUrl'] ?? [];
+        $this->currentLinkParts = is_array($currentLinkParts) ? $currentLinkParts : [];
+        $this->editorId = is_string($queryParameters['editorId'] ?? null) ? $queryParameters['editorId'] : '';
+        $this->contentsLanguage = is_string($queryParameters['contentsLanguage'] ?? null) ? $queryParameters['contentsLanguage'] : '';
         $tcaFieldConf = [
             'enableRichtext' => true,
-            'richtextConfiguration' => $this->parameters['richtextConfigurationName'] ?? null,
+            'richtextConfiguration' => is_string($this->parameters['richtextConfigurationName'] ?? null)
+                ? $this->parameters['richtextConfigurationName']
+                : null,
         ];
         $this->thisConfig = $this->richtext->getConfiguration(
-            $this->parameters['table'],
-            $this->parameters['fieldName'],
+            (string)($this->parameters['table'] ?? ''),
+            (string)($this->parameters['fieldName'] ?? ''),
             (int)$this->parameters['pid'],
-            $this->parameters['recordType'],
+            (string)($this->parameters['recordType'] ?? ''),
             $tcaFieldConf
         );
-        $this->buttonConfig = $this->thisConfig['buttons']['link'] ?? [];
+        $buttonConfig = $this->thisConfig['buttons']['link'] ?? [];
+        $this->buttonConfig = is_array($buttonConfig) ? $buttonConfig : [];
     }
 
     protected function initCurrentUrl(): void
@@ -123,14 +155,16 @@ class BrowseLinksController extends AbstractLinkBrowserController
         if (empty($this->currentLinkParts)) {
             return;
         }
-        if (!empty($this->currentLinkParts['url'])) {
+        $currentUrl = $this->currentLinkParts['url'] ?? null;
+        if (is_string($currentUrl) && $currentUrl !== '') {
             try {
-                $data = $this->linkService->resolve($this->currentLinkParts['url']);
+                $data = $this->linkService->resolve($currentUrl);
                 $this->currentLinkParts['type'] = $data['type'];
                 unset($data['type']);
                 $this->currentLinkParts['url'] = $data;
-                if (!empty($this->currentLinkParts['url']['parameters'])) {
-                    $this->currentLinkParts['params'] = '&' . $this->currentLinkParts['url']['parameters'];
+                $resolvedUrl = $data;
+                if (is_string($resolvedUrl['parameters'] ?? null) && $resolvedUrl['parameters'] !== '') {
+                    $this->currentLinkParts['params'] = '&' . $resolvedUrl['parameters'];
                 }
             } catch (UnknownLinkHandlerException $e) {
                 $this->flashMessageService->getMessageQueueByIdentifier()->enqueue(
@@ -143,11 +177,15 @@ class BrowseLinksController extends AbstractLinkBrowserController
 
     protected function renderLinkAttributeFields(ViewInterface $view): string
     {
+        $buttonProperties = $this->arrayValue($this->buttonConfig, 'properties');
+        $classProperties = $this->arrayValue($buttonProperties, 'class');
+        $allowedClasses = $classProperties['allowedClasses'] ?? null;
+
         // Processing the classes configuration
-        if (!empty($this->buttonConfig['properties']['class']['allowedClasses'])) {
-            $classesAnchorArray = is_array($this->buttonConfig['properties']['class']['allowedClasses'])
-                ? $this->buttonConfig['properties']['class']['allowedClasses']
-                : GeneralUtility::trimExplode(',', $this->buttonConfig['properties']['class']['allowedClasses'], true);
+        if (!empty($allowedClasses)) {
+            $classesAnchorArray = is_array($allowedClasses)
+                ? array_values(array_filter($allowedClasses, static fn(mixed $class): bool => is_string($class) && $class !== ''))
+                : (is_string($allowedClasses) ? GeneralUtility::trimExplode(',', $allowedClasses, true) : []);
             // Collecting allowed classes and configured default values
             $classesAnchor = [
                 'all' => [],
@@ -155,14 +193,22 @@ class BrowseLinksController extends AbstractLinkBrowserController
 
             if (is_array($this->thisConfig['classesAnchor'] ?? null)) {
                 foreach ($this->thisConfig['classesAnchor'] as $conf) {
-                    if (in_array($conf['class'] ?? null, $classesAnchorArray, true)) {
-                        $classesAnchor['all'][] = $conf['class'];
-                        if ($conf['type'] === $this->displayedLinkHandlerId) {
-                            $classesAnchor[$conf['type']][] = $conf['class'];
-                            if (($this->buttonConfig[$conf['type']]['properties']['class']['default'] ?? null) === $conf['class']) {
-                                $this->classesAnchorDefault[$conf['type']] = $conf['class'];
+                    if (!is_array($conf)) {
+                        continue;
+                    }
+
+                    $configuredClass = is_string($conf['class'] ?? null) ? $conf['class'] : null;
+                    $configuredType = is_string($conf['type'] ?? null) ? $conf['type'] : null;
+
+                    if ($configuredClass !== null && in_array($configuredClass, $classesAnchorArray, true)) {
+                        $classesAnchor['all'][] = $configuredClass;
+                        if ($configuredType === $this->displayedLinkHandlerId) {
+                            $classesAnchor[$configuredType][] = $configuredClass;
+                            $linkHandlerClassProperties = $this->getLinkHandlerClassProperties($configuredType);
+                            if (($linkHandlerClassProperties['default'] ?? null) === $configuredClass) {
+                                $this->classesAnchorDefault[$configuredType] = $configuredClass;
                                 if (isset($conf['target'])) {
-                                    $this->classesAnchorDefaultTarget[$conf['type']] = trim((string)$conf['target']);
+                                    $this->classesAnchorDefaultTarget[$configuredType] = trim((string)$conf['target']);
                                 }
                             }
                         }
@@ -220,12 +266,12 @@ class BrowseLinksController extends AbstractLinkBrowserController
                     ) {
                         $selected = 'selected="selected"';
                     }
-                    $classLabel = !empty($this->thisConfig['classes'][$class]['name'])
-                        ? $this->getPageConfigLabel($this->thisConfig['classes'][$class]['name'], false)
+                    $configuredClass = $this->arrayValue($this->arrayValue($this->thisConfig, 'classes'), $class);
+                    $className = $this->stringValue($configuredClass, 'name');
+                    $classLabel = $className !== ''
+                        ? $this->getPageConfigLabel($className, false)
                         : $class;
-                    $classStyle = !empty($this->thisConfig['classes'][$class]['value'])
-                        ? $this->thisConfig['classes'][$class]['value']
-                        : '';
+                    $classStyle = $this->stringValue($configuredClass, 'value');
 
                     $this->classesAnchorJSOptions[$this->displayedLinkHandlerId] ??= '';
                     $this->classesAnchorJSOptions[$this->displayedLinkHandlerId] .= '<option ' . $selected . ' value="' . htmlspecialchars($class) . '"'
@@ -237,8 +283,8 @@ class BrowseLinksController extends AbstractLinkBrowserController
             if (
                 ($this->classesAnchorJSOptions[$this->displayedLinkHandlerId] ?? false)
                 && !(
-                    ($this->buttonConfig['properties']['class']['required'] ?? false)
-                    || ($this->buttonConfig[$this->displayedLinkHandlerId]['properties']['class']['required'] ?? false)
+                    (bool)($classProperties['required'] ?? false)
+                    || (bool)($this->getLinkHandlerClassProperties($this->displayedLinkHandlerId)['required'] ?? false)
                 )
             ) {
                 $selected = '';
@@ -251,7 +297,7 @@ class BrowseLinksController extends AbstractLinkBrowserController
         // Default target
         $this->defaultLinkTarget = ($this->classesAnchorDefault[$this->displayedLinkHandlerId] ?? false) && ($this->classesAnchorDefaultTarget[$this->displayedLinkHandlerId] ?? false)
             ? $this->classesAnchorDefaultTarget[$this->displayedLinkHandlerId]
-            : ($this->buttonConfig[$this->displayedLinkHandlerId]['properties']['target']['default'] ?? $this->buttonConfig['properties']['target']['default'] ?? '');
+            : $this->resolveDefaultLinkTarget();
 
         return parent::renderLinkAttributeFields($view);
     }
@@ -283,15 +329,16 @@ class BrowseLinksController extends AbstractLinkBrowserController
     {
         $allowedItems = parent::getAllowedItems();
 
-        if (isset($this->thisConfig['allowedTypes'])) {
+        if (is_string($this->thisConfig['allowedTypes'] ?? null)) {
             $allowedItems = array_intersect($allowedItems, GeneralUtility::trimExplode(',', $this->thisConfig['allowedTypes'], true));
-        } elseif (isset($this->thisConfig['blindLinkOptions'])) {
+        } elseif (is_string($this->thisConfig['blindLinkOptions'] ?? null)) {
             // @todo Deprecate this option
             $allowedItems = array_diff($allowedItems, GeneralUtility::trimExplode(',', $this->thisConfig['blindLinkOptions'], true));
         }
 
-        if (is_array($this->buttonConfig['options'] ?? null) && !empty($this->buttonConfig['options']['removeItems'])) {
-            $allowedItems = array_diff($allowedItems, GeneralUtility::trimExplode(',', $this->buttonConfig['options']['removeItems'], true));
+        $options = $this->arrayValue($this->buttonConfig, 'options');
+        if (is_string($options['removeItems'] ?? null) && $options['removeItems'] !== '') {
+            $allowedItems = array_diff($allowedItems, GeneralUtility::trimExplode(',', $options['removeItems'], true));
         }
 
         return $allowedItems;
@@ -304,9 +351,9 @@ class BrowseLinksController extends AbstractLinkBrowserController
     {
         $allowedLinkAttributes = parent::getAllowedLinkAttributes();
 
-        if (isset($this->thisConfig['allowedOptions'])) {
+        if (is_string($this->thisConfig['allowedOptions'] ?? null)) {
             $allowedLinkAttributes = array_intersect($allowedLinkAttributes, GeneralUtility::trimExplode(',', $this->thisConfig['allowedOptions'], true));
-        } elseif (isset($this->thisConfig['blindLinkFields'])) {
+        } elseif (is_string($this->thisConfig['blindLinkFields'] ?? null)) {
             // @todo Deprecate this option
             $allowedLinkAttributes = array_diff($allowedLinkAttributes, GeneralUtility::trimExplode(',', $this->thisConfig['blindLinkFields'], true));
         }
@@ -325,7 +372,8 @@ class BrowseLinksController extends AbstractLinkBrowserController
         $fieldRenderingDefinitions['class'] = $this->getClassField();
         $fieldRenderingDefinitions['target'] = $this->getTargetField();
         $fieldRenderingDefinitions['rel'] = $this->getRelField();
-        if (empty($this->buttonConfig['queryParametersSelector']['enabled'])) {
+        $queryParameterSelector = $this->arrayValue($this->buttonConfig, 'queryParametersSelector');
+        if (empty($queryParameterSelector['enabled'])) {
             unset($fieldRenderingDefinitions['params']);
         }
         return $fieldRenderingDefinitions;
@@ -333,7 +381,8 @@ class BrowseLinksController extends AbstractLinkBrowserController
 
     protected function getRelField(): string
     {
-        if (empty($this->buttonConfig['relAttribute']['enabled'])) {
+        $relAttributeConfiguration = $this->arrayValue($this->buttonConfig, 'relAttribute');
+        if (empty($relAttributeConfiguration['enabled'])) {
             return '';
         }
 
@@ -418,5 +467,48 @@ class BrowseLinksController extends AbstractLinkBrowserController
         $parameters['data-site-url'] = $this->siteUrl;
         $parameters['data-default-link-target'] = $this->defaultLinkTarget;
         return $parameters;
+    }
+
+    /**
+     * @param array<string, mixed> $source
+     * @return array<string, mixed>
+     */
+    private function arrayValue(array $source, string $key): array
+    {
+        $value = $source[$key] ?? null;
+        return is_array($value) ? $value : [];
+    }
+
+    /**
+     * @param array<string, mixed> $source
+     */
+    private function stringValue(array $source, string $key): string
+    {
+        $value = $source[$key] ?? null;
+        return is_string($value) ? $value : '';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getLinkHandlerClassProperties(string $handlerIdentifier): array
+    {
+        $linkHandlerConfiguration = $this->arrayValue($this->buttonConfig, $handlerIdentifier);
+        $linkHandlerProperties = $this->arrayValue($linkHandlerConfiguration, 'properties');
+        return $this->arrayValue($linkHandlerProperties, 'class');
+    }
+
+    private function resolveDefaultLinkTarget(): string
+    {
+        $linkHandlerConfiguration = $this->arrayValue($this->buttonConfig, $this->displayedLinkHandlerId);
+        $linkHandlerProperties = $this->arrayValue($linkHandlerConfiguration, 'properties');
+        $linkHandlerTargetProperties = $this->arrayValue($linkHandlerProperties, 'target');
+        if (is_string($linkHandlerTargetProperties['default'] ?? null)) {
+            return $linkHandlerTargetProperties['default'];
+        }
+
+        $buttonProperties = $this->arrayValue($this->buttonConfig, 'properties');
+        $buttonTargetProperties = $this->arrayValue($buttonProperties, 'target');
+        return is_string($buttonTargetProperties['default'] ?? null) ? $buttonTargetProperties['default'] : '';
     }
 }

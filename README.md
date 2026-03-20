@@ -1,48 +1,37 @@
-# TYPO3 TipTap Editor (Beta)
+# TYPO3 TipTap Editor
 
-This extension provides a modern TipTap rich text editor integration for TYPO3 CMS.
+TipTap integration for TYPO3 CMS 14. The extension ships a default preset, a custom backend FormEngine element, and a link browser integration that preserves the active record context for staged editing workflows.
 
 The development of this extension was funded by the [TYPO3 Association](https://typo3.org) through the [Community Ideas program](https://typo3.org/article/members-have-selected-five-ideas-to-be-funded-in-quarter-3-2025).
 
 ![Screenshot of the TipTap Editor Integration in TYPO3](docs/images/example-1.webp)
 
----
+## Requirements
 
-## Quick Start Guide
+- TYPO3 CMS `14 LTS`
+- PHP `8.3+`
+- `EXT:rte_ckeditor`
+- `EXT:workspaces` if you want staged editorial workflows
 
-Install the extension via Composer:
+## Installation
 
 ```bash
 composer require in2code/typo3-tiptap
 ```
 
-You don't have to remove the CkEditor extension; both editors can coexist.
-
-The editor comes with a **default configuration** that works out of the box. You can start using it immediately without any additional setup.
-If you want to use the default configuration, make sure to not overwrite the preset in your Page TSconfig.
-
-### Optional: Customize the Configuration
-
-If you want to customize the editor to your specific needs, you can overwrite the default configuration:
-
-1. Copy the [example YAML configuration file](Configuration/RTE/Full.yaml) to your site package
-2. Customize it according to your requirements
-3. Register your custom preset in TYPO3:
+The extension registers the shipped preset automatically:
 
 ```php
-// Setup custom editor configuration
-$GLOBALS['TYPO3_CONF_VARS']['RTE']['Presets']['my_custom_preset'] = 'EXT:sitepackage/Configuration/RTE/TipTap.yaml';
+$GLOBALS['TYPO3_CONF_VARS']['RTE']['Presets']['default'] = 'EXT:typo3_tiptap/Configuration/RTE/Full.yaml';
 ```
 
-4. Activate the custom preset in your Page TSconfig:
-```
-RTE.default.preset = my_custom_preset
-```
+If your project already uses custom presets, point the preset to your own YAML file instead.
 
+## TYPO3 14 and Workspaces
 
-See also the documentation [How do I use a different preset?](https://docs.typo3.org/c/typo3/cms-rte-ckeditor/main/en-us/Configuration/Examples.html#how-do-i-use-a-different-preset)
+This release targets TYPO3 v14 only. The backend integration forwards the current record metadata, including the configured RTE preset, to the custom link browser so edited draft records behave consistently in workspace-enabled editing flows.
 
----
+TipTap fields work inside TYPO3 workspaces, but TYPO3's standard file handling limitation still applies: physical FAL files are not versioned per workspace. When editors prepare unpublished changes, they should upload new files instead of overwriting existing assets.
 
 ## Configuration
 
@@ -74,12 +63,9 @@ editor:
                   config:
                       types: [ 'ordered', 'bullet' ]
                 - path: '@typo3-tiptap/tiptap/plugins/blockquote.js'
+                - path: '@typo3-tiptap/tiptap/plugins/table.js'
+                  config: { defaultRows: 3, defaultCols: 3, withHeaderRow: false }
                 - path: '@typo3-tiptap/tiptap/plugins/justify.js'
-                  config:
-                    alignments:
-                      left: 'text-left'
-                      center: 'text-center'
-                      right: 'text-right'
                 - path: '@typo3-tiptap/tiptap/plugins/source.js'
                 - path: '@typo3-tiptap/tiptap/plugins/styles.js'
                   config:
@@ -101,46 +87,68 @@ editor:
     config:
       contentCss:
         - 'EXT:sitepackage/Resources/Public/Css/content.css'
+      plugins:
+        - path: '@typo3-tiptap/tiptap/plugins/headings.js'
+          config: { levels: [1, 2, 3, 4, 5, 6] }
+        - path: '@typo3-tiptap/tiptap/plugins/history.js'
+          config: { types: ['undo', 'redo'] }
+        - path: '@typo3-tiptap/tiptap/plugins/bold.js'
+        - path: '@typo3-tiptap/tiptap/plugins/underline.js'
+        - path: '@typo3-tiptap/tiptap/plugins/italic.js'
+        - path: '@typo3-tiptap/tiptap/plugins/strikethrough.js'
+        - path: '@typo3-tiptap/tiptap/plugins/link.js'
+        - path: '@typo3-tiptap/tiptap/plugins/list.js'
+          config:
+            types: ['ordered', 'bullet']
 ```
 
----
+To use a custom preset:
 
-## Creating Custom Plugins
+```php
+$GLOBALS['TYPO3_CONF_VARS']['RTE']['Presets']['my_custom_preset']
+    = 'EXT:sitepackage/Configuration/RTE/TipTap.yaml';
+```
 
-You can extend TipTap with custom plugins by creating JavaScript files in your site package and referencing them in your RTE configuration.
+```typoscript
+RTE.default.preset = my_custom_preset
+```
 
-### Step 1: Register Your Plugin
+## Custom Plugins
 
-Add your plugin to the RTE YAML configuration:
+Register your site package JavaScript module path in the site package's `Configuration/JavaScriptModules.php`, then reference the plugin in the YAML preset:
+
+```php
+return [
+    'imports' => [
+        '@site-package/tiptap/' => 'EXT:site_package/Resources/Public/JavaScript/TipTap/',
+    ],
+];
+```
 
 ```yaml
 editor:
   tiptap:
     config:
       plugins:
-        - path: '@example/in2code/Plugins/example.js'
-          config: # Optional plugin configuration
+        - path: '@site-package/tiptap/example.js'
+          config:
             additionalClass: 'my-example-class'
 ```
 
-### Step 2: Create the Plugin File
-
-Create your plugin JavaScript file. Configuration is optional—if you don't need it, simply remove the `unsafeConfig` and `parseTipTapPluginYamlConfiguration` parts.
+Example plugin:
 
 ```js
 import {
-    defineTipTapPlugin,
-    parseTipTapPluginYamlConfiguration,
+  defineTipTapPlugin,
+  parseTipTapPluginYamlConfiguration,
 } from '@typo3-tiptap/tiptap/index.js'
 
 export default function (unsafeConfig) {
-  // Parse plugin configuration from YAML to ensure it matches expectations
-  // Configuration parsing uses Zod validation. Learn more: https://zod.dev/
   const config = parseTipTapPluginYamlConfiguration({
     pluginId: 'cookie',
     config: unsafeConfig,
     getValidationSchema: z => z.object({
-      additionalClass: z.string(), // requires additionalClass to be provided and be a string
+      additionalClass: z.string(),
     }),
   })
 
@@ -155,23 +163,13 @@ export default function (unsafeConfig) {
         label: 'Add cookie',
         iconIdentifier: 'icon-cookie',
         position: {
-          // Valid toolbar group IDs: history, styles, heading, general, formatting, developer
           toolbarGroupId: 'general',
-          // Valid bubble menu group IDs: formatting, heading, styles
-          // Set to false to disable button in bubble menu or toolbar
           bubbleMenuGroupId: false,
         },
-        // Optional status functions to control button state
-        status: {
-          isActive: ({ editor }) => editor.isActive({ textAlign: 'right' }),
-          isDisabled: ({ editor }) => !editor.can().setTextAlign('right'),
-        },
-        // This function executes when the button is clicked
-        // Add your TipTap logic here
         onExecute: ({ editor }) => {
           editor.commands.setCookieButton({
             text: 'Accept Cookies',
-            class: config.additionalClass
+            class: config.additionalClass,
           })
         },
       },
@@ -180,31 +178,17 @@ export default function (unsafeConfig) {
 }
 ```
 
-### Learning by Example
-
-The plugin structure may seem abstract at first. We recommend reviewing the [existing plugins](frontend/src/plugins) in the source code and using them as templates for your own implementations.
-
----
-
 ## FAQ
 
-### #1755159351 MissingEditorConfigurationException: Missing editor configuration for tiptap
+### `#1755159351 MissingEditorConfigurationException`
 
-Most probably you have already customized your CKEditor presets. Search e.g. your site package for `$GLOBALS
-['TYPO3_CONF_VARS']['RTE']['Presets']` and change it to the TipTap YAML file with one of the following configurations:
+The selected RTE preset does not provide `editor.tiptap.config`. Point the preset either to the shipped configuration or to a site package YAML file that contains the TipTap configuration block.
 
-```php
-// Use the shipped configuration  file
-$GLOBALS['TYPO3_CONF_VARS']['RTE']['Presets']['my_custom_preset'] = 'EXT:typo3_tiptap/Configuration/RTE/Full.yaml';
-```
+## Documentation
 
-```php
-// Setup custom editor configuration
-$GLOBALS['TYPO3_CONF_VARS']['RTE']['Presets']['my_custom_preset'] = 'EXT:sitepackage/Configuration/RTE/TipTap.yaml';
-```
+- Project documentation: [Documentation/Index.rst](Documentation/Index.rst)
+- Local development: [docs/local-setup.md](docs/local-setup.md)
 
----
+## Credits
 
-## Local Development
-
-For instructions on setting up the project for local development, please refer to the [Local Setup Documentation](docs/local-setup.md).
+The extension is maintained by [in2code](https://www.in2code.de/). Their sustained open source engagement in the TYPO3 ecosystem, especially around practical editor integrations and community-funded work, deserves explicit professional recognition and thanks.
