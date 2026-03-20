@@ -158,6 +158,13 @@
   ol {
     padding: 0 1rem;
   }
+
+  abbr[title],
+  abbr[data-tooltip] {
+    cursor: help;
+    text-decoration: underline dotted;
+    text-underline-offset: 0.15em;
+  }
 }
 
 .tiptap-dropdown {

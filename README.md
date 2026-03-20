@@ -98,6 +98,7 @@ editor:
         - path: '@typo3-tiptap/tiptap/plugins/italic.js'
         - path: '@typo3-tiptap/tiptap/plugins/strikethrough.js'
         - path: '@typo3-tiptap/tiptap/plugins/link.js'
+        - path: '@typo3-tiptap/tiptap/plugins/abbreviation.js'
         - path: '@typo3-tiptap/tiptap/plugins/list.js'
           config:
             types: ['ordered', 'bullet']
@@ -184,6 +185,16 @@ export default function (unsafeConfig) {
 ### `#1755159351 MissingEditorConfigurationException`
 
 The selected RTE preset does not provide `editor.tiptap.config`. Point the preset either to the shipped configuration or to a site package YAML file that contains the TipTap configuration block.
+
+### Abbreviations and tooltips
+
+The shipped preset now includes an abbreviation button. Select text, trigger `Abbreviation`, and enter the explanation text. The editor stores semantic `<abbr>` markup with both `title` and `data-tooltip` attributes.
+
+For frontend tooltip styling, include:
+
+```typoscript
+page.includeCSS.tiptapAbbreviationTooltip = EXT:typo3_tiptap/Resources/Public/Css/AbbreviationTooltip.css
+```
 
 ## Documentation
 

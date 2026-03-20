@@ -1,0 +1,53 @@
+abbr[data-tooltip],
+abbr[title] {
+    position: relative;
+    cursor: help;
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+}
+
+abbr[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    inset-block-end: calc(100% + 0.4rem);
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    max-inline-size: min(18rem, 80vw);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.35rem;
+    background: rgb(32 36 41 / 0.95);
+    color: #fff;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    text-align: center;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    z-index: 1000;
+}
+
+abbr[data-tooltip]::after {
+    content: "";
+    position: absolute;
+    inset-block-end: 100%;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    border-width: 0.35rem;
+    border-style: solid;
+    border-color: rgb(32 36 41 / 0.95) transparent transparent transparent;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    z-index: 1000;
+}
+
+abbr[data-tooltip]:hover::before,
+abbr[data-tooltip]:hover::after,
+abbr[data-tooltip]:focus-visible::before,
+abbr[data-tooltip]:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+}
