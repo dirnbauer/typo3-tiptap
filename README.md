@@ -10,7 +10,6 @@ The development of this extension was funded by the [TYPO3 Association](https://
 
 - TYPO3 CMS `14 LTS`
 - PHP `8.3+`
-- `EXT:rte_ckeditor`
 - `EXT:workspaces` if you want staged editorial workflows
 
 ## Installation
@@ -26,6 +25,8 @@ $GLOBALS['TYPO3_CONF_VARS']['RTE']['Presets']['default'] = 'EXT:typo3_tiptap/Con
 ```
 
 If your project already uses custom presets, point the preset to your own YAML file instead.
+
+You do not need `EXT:rte_ckeditor` for this extension itself. TipTap provides its own FormEngine integration, preset, and link browser route.
 
 ## TYPO3 14 and Workspaces
 

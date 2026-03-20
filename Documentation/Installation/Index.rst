@@ -7,7 +7,6 @@ Requirements
 
 -  TYPO3 CMS 14 LTS
 -  PHP 8.3 or newer
--  ``EXT:rte_ckeditor``
 
 Composer
 ========
@@ -15,6 +14,8 @@ Composer
 ..  code-block:: bash
 
     composer require in2code/typo3-tiptap
+
+The extension does not require ``EXT:rte_ckeditor``. It registers its own rich text resolver, preset, and backend link browser integration.
 
 Optional workspace support
 ==========================

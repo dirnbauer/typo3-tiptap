@@ -13,8 +13,7 @@
   "require": {
     "php": ">=8.3.0",
     "typo3/cms-backend": "^14.0",
-    "typo3/cms-core": "^14.0",
-    "typo3/cms-rte-ckeditor": "^14.0"
+    "typo3/cms-core": "^14.0"
   },
   "suggest": {
     "typo3/cms-workspaces": "Enable staged editorial workflows and workspace previews for TipTap fields."
