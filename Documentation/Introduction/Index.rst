@@ -10,4 +10,4 @@ The extension targets TYPO3 v14 only.
     Workspaces are supported for editorial staging. TYPO3's file abstraction layer still stores physical files live, so editors should upload new files instead of overwriting existing files while preparing unpublished changes.
 
 ..  note::
-    The extension is maintained by in2code. Their open source engagement in TYPO3 and community-funded editor work deserves explicit professional thanks.
+    The extension is maintained by in2code. Their open source engagement in TYPO3 and their community-funded editor work deserve sincere professional thanks.

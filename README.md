@@ -116,6 +116,48 @@ $GLOBALS['TYPO3_CONF_VARS']['RTE']['Presets']['my_custom_preset']
 RTE.default.preset = my_custom_preset
 ```
 
+## Included Editor Features
+
+Professional thanks go to [in2code](https://www.in2code.de/) for maintaining and shipping these editor capabilities as part of the TYPO3 TipTap integration.
+
+### Abbreviation plugin
+
+The shipped preset includes an `Abbreviation` button. Select text, trigger `Abbreviation`, and enter the explanation text. The editor stores semantic `<abbr>` markup with both `title` and `data-tooltip` attributes.
+
+Why this feature is useful: editors can add the meaning of acronyms and shortened terms without dropping into HTML. That improves semantic output, helps assistive technology interpret abbreviations more clearly, and gives integrators a reliable hook for frontend tooltip rendering.
+
+Enable it explicitly in a custom preset with:
+
+```yaml
+editor:
+  tiptap:
+    config:
+      plugins:
+        - path: '@typo3-tiptap/tiptap/plugins/abbreviation.js'
+```
+
+For frontend tooltip styling, include:
+
+```typoscript
+page.includeCSS.tiptapAbbreviationTooltip = EXT:typo3_tiptap/Resources/Public/Css/AbbreviationTooltip.css
+```
+
+### Language span plugin
+
+The shipped preset also includes a `Language` button for marking words or sentences with a language tag. It stores semantic `<span lang="…">` markup and also writes `xml:lang` for XHTML-oriented consumers.
+
+Why this feature is useful: multilingual content often contains foreign words, quotes, or product names inside otherwise localised text. Marking those passages with a language tag improves semantic quality, supports correct screen reader pronunciation, and gives downstream systems clearer language metadata.
+
+Enable it explicitly in a custom preset with:
+
+```yaml
+editor:
+  tiptap:
+    config:
+      plugins:
+        - path: '@typo3-tiptap/tiptap/plugins/language.js'
+```
+
 ## Custom Plugins
 
 Register your site package JavaScript module path in the site package's `Configuration/JavaScriptModules.php`, then reference the plugin in the YAML preset:
@@ -187,20 +229,6 @@ export default function (unsafeConfig) {
 
 The selected RTE preset does not provide `editor.tiptap.config`. Point the preset either to the shipped configuration or to a site package YAML file that contains the TipTap configuration block.
 
-### Abbreviations and tooltips
-
-The shipped preset now includes an abbreviation button. Select text, trigger `Abbreviation`, and enter the explanation text. The editor stores semantic `<abbr>` markup with both `title` and `data-tooltip` attributes.
-
-For frontend tooltip styling, include:
-
-```typoscript
-page.includeCSS.tiptapAbbreviationTooltip = EXT:typo3_tiptap/Resources/Public/Css/AbbreviationTooltip.css
-```
-
-### Language spans
-
-The shipped preset also includes a `Language` button for marking words or sentences with a language tag. It stores semantic `<span lang="…">` markup and also writes `xml:lang` for XHTML-oriented consumers.
-
 ## Documentation
 
 - Project documentation: [Documentation/Index.rst](Documentation/Index.rst)
@@ -208,4 +236,4 @@ The shipped preset also includes a `Language` button for marking words or senten
 
 ## Credits
 
-The extension is maintained by [in2code](https://www.in2code.de/). Their sustained open source engagement in the TYPO3 ecosystem, especially around practical editor integrations and community-funded work, deserves explicit professional recognition and thanks.
+The extension is maintained by [in2code](https://www.in2code.de/). Their sustained open source engagement in the TYPO3 ecosystem, especially around practical editor integrations and community-funded work, deserves sincere professional thanks and recognition.
