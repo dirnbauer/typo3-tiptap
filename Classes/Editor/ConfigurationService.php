@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 namespace In2code\Typo3TipTap\Editor;
 
-use In2code\Typo3TipTap\Exception\MissingEditorConfigurationException;
+use Symfony\Component\Yaml\Yaml;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+use function dirname;
+use function is_array;
+use function is_file;
+use function is_scalar;
+use function is_string;
+use function reset;
+use function trim;
+
 final class ConfigurationService
 {
+    private const DEFAULT_CONFIGURATION_FILE = '/Configuration/RTE/Full.yaml';
+
     public function __construct(
         private readonly UriBuilder $uriBuilder,
     ) {}
@@ -19,7 +29,6 @@ final class ConfigurationService
      * @param array<string, mixed> $fieldConfiguration
      * @param array<string, mixed> $elementData
      * @return array<string, mixed>
-     * @throws MissingEditorConfigurationException
      */
     public function getConfiguration(array $fieldConfiguration, array $elementData): array
     {
@@ -84,28 +93,57 @@ final class ConfigurationService
     /**
      * @param array<string, mixed> $fieldConfiguration
      * @return array<string, mixed>
-     * @throws MissingEditorConfigurationException
      */
     private function extractEditorConfiguration(array $fieldConfiguration): array
     {
         $richtextConfiguration = $fieldConfiguration['richtextConfiguration'] ?? null;
         if (!is_array($richtextConfiguration)) {
-            throw new MissingEditorConfigurationException('Missing editor configuration for tiptap', 1755159351);
+            return $this->getDefaultEditorConfiguration();
         }
 
         $editorConfiguration = $richtextConfiguration['editor'] ?? null;
         if (!is_array($editorConfiguration)) {
-            throw new MissingEditorConfigurationException('Missing editor configuration for tiptap', 1755159351);
+            return $this->getDefaultEditorConfiguration();
         }
 
         $tiptapConfiguration = $editorConfiguration['tiptap'] ?? null;
         if (!is_array($tiptapConfiguration)) {
-            throw new MissingEditorConfigurationException('Missing editor configuration for tiptap', 1755159351);
+            return $this->getDefaultEditorConfiguration();
         }
 
         $config = $tiptapConfiguration['config'] ?? null;
         if (!is_array($config)) {
-            throw new MissingEditorConfigurationException('Missing editor configuration for tiptap', 1755159351);
+            return $this->getDefaultEditorConfiguration();
+        }
+
+        return $config;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getDefaultEditorConfiguration(): array
+    {
+        $configurationFile = dirname(__DIR__, 2) . self::DEFAULT_CONFIGURATION_FILE;
+        if (!is_file($configurationFile)) {
+            return [
+                'uiMode' => 'toolbar',
+                'enableContentDragAndDrop' => true,
+                'plugins' => [],
+            ];
+        }
+
+        $configuration = Yaml::parseFile($configurationFile);
+        $config = is_array($configuration)
+            ? ($configuration['editor']['tiptap']['config'] ?? null)
+            : null;
+
+        if (!is_array($config)) {
+            return [
+                'uiMode' => 'toolbar',
+                'enableContentDragAndDrop' => true,
+                'plugins' => [],
+            ];
         }
 
         return $config;

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace In2code\Typo3TipTap\Form\Element;
 
 use In2code\Typo3TipTap\Editor\ConfigurationService;
-use In2code\Typo3TipTap\Exception\MissingEditorConfigurationException;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
@@ -51,7 +50,6 @@ final class TipTapTextElement extends AbstractFormElement
      * Renders the ckeditor element
      *
      * @return array<string, mixed>
-     * @throws MissingEditorConfigurationException
      * @throws RouteNotFoundException
      */
     public function render(): array

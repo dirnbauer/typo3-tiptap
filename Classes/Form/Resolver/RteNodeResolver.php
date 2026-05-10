@@ -58,11 +58,15 @@ final class RteNodeResolver implements NodeResolverInterface
             return false;
         }
 
-        // If RTE is enabled for field
-        return ((bool)($config['enableRichtext'] ?? false) === true)
-            // If RTE config is found (prepared by TcaText data provider)
-            && is_array($config['richtextConfiguration'] ?? null)
-            // If RTE is not disabled on configuration level
-            && !($config['richtextConfiguration']['disabled'] ?? false);
+        if ((bool)($config['enableRichtext'] ?? false) === false) {
+            return false;
+        }
+
+        $richtextConfiguration = $config['richtextConfiguration'] ?? null;
+        if (!is_array($richtextConfiguration)) {
+            return true;
+        }
+
+        return !($richtextConfiguration['disabled'] ?? false);
     }
 }

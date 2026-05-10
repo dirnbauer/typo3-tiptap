@@ -32,6 +32,23 @@ final class RteNodeResolverTest extends TestCase
     }
 
     #[Test]
+    public function resolveReturnsTipTapElementForEnabledRichtextFieldsWithoutPreparedRichtextConfiguration(): void
+    {
+        $subject = new RteNodeResolver();
+        $subject->setData([
+            'parameterArray' => [
+                'fieldConf' => [
+                    'config' => [
+                        'enableRichtext' => true,
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertSame(TipTapTextElement::class, $subject->resolve());
+    }
+
+    #[Test]
     public function resolveReturnsNullForDisabledRichtextFields(): void
     {
         $subject = new RteNodeResolver();

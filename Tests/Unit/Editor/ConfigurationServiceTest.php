@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace In2code\Typo3TipTap\Tests\Unit\Editor;
 
 use In2code\Typo3TipTap\Editor\ConfigurationService;
-use In2code\Typo3TipTap\Exception\MissingEditorConfigurationException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -78,11 +77,17 @@ final class ConfigurationServiceTest extends TestCase
     }
 
     #[Test]
-    public function getConfigurationThrowsExceptionIfTipTapConfigIsMissing(): void
+    public function getConfigurationUsesFullPresetIfTipTapConfigIsMissing(): void
     {
-        $this->expectException(MissingEditorConfigurationException::class);
-        $this->expectExceptionCode(1755159351);
+        $this->uriBuilder
+            ->expects(self::once())
+            ->method('buildUriFromRoute')
+            ->willReturn('/typo3/tiptap/wizard');
 
-        $this->subject->getConfiguration([], []);
+        $configuration = $this->subject->getConfiguration([], []);
+
+        self::assertSame('toolbar', $configuration['uiMode']);
+        self::assertNotEmpty($configuration['plugins']);
+        self::assertSame('/typo3/tiptap/wizard', $configuration['linkBrowserUrl']);
     }
 }
