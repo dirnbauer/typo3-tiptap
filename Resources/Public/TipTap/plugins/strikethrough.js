@@ -1,4 +1,4 @@
-import { n as e } from "../configuration-BT9xaJ2A.js";
+import { n as e } from "../configuration-CTry3cSH.js";
 //#region src/plugins/strikethrough.ts
 function t() {
 	return e({ commands: [{

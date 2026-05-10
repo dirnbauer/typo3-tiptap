@@ -1,4 +1,4 @@
-import { n as e } from "../configuration-BT9xaJ2A.js";
+import { n as e } from "../configuration-CTry3cSH.js";
 import { n as t } from "../dist-D5bVvPqr.js";
 //#region src/plugins/italic.ts
 function n() {

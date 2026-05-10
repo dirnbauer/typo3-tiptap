@@ -1,4 +1,4 @@
-import { n as e, r as t } from "../configuration-BT9xaJ2A.js";
+import { n as e, r as t } from "../configuration-CTry3cSH.js";
 import { i as n } from "../dist-BppL3qHu.js";
 //#region src/plugins/justify.ts
 var r = [

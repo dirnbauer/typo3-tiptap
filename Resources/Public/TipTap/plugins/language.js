@@ -1,4 +1,4 @@
-import { n as e } from "../configuration-BT9xaJ2A.js";
+import { n as e } from "../configuration-CTry3cSH.js";
 import { Gt as t, c as n } from "../dist-BppL3qHu.js";
 //#region src/plugins/language.ts
 var r = n.create({
@@ -30,7 +30,7 @@ var r = n.create({
 	}
 });
 function i() {
-	e({
+	return e({
 		extensions: [r],
 		commands: [{
 			id: "language",

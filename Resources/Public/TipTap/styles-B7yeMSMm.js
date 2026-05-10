@@ -1,4 +1,4 @@
-import { c as e, i as t, o as n } from "./configuration-BT9xaJ2A.js";
+import { a as e, l as t, s as n } from "./configuration-CTry3cSH.js";
 //#region node_modules/@vue/shared/dist/shared.esm-bundler.js
 /* @__NO_SIDE_EFFECTS__ */
 function r(e) {
@@ -884,10 +884,10 @@ function $(e, t = Infinity, n) {
 }
 //#endregion
 //#region src/schema/plugin/styles.ts
-var qt = n({ styles: t(n({
-	name: e().min(1),
-	element: e().min(1),
-	classes: e().min(1)
+var qt = n({ styles: e(n({
+	name: t().min(1),
+	element: t().min(1),
+	classes: t().min(1)
 })).min(1) });
 //#endregion
 export { pe as $, s as A, de as B, P as C, Kt as D, Rt as E, u as F, c as G, _ as H, ge as I, ie as J, ne as K, f as L, oe as M, le as N, a as O, fe as P, De as Q, ce as R, J as S, F as T, l as U, p as V, b as W, v as X, we as Y, y as Z, kt as _, Ht as a, me as at, K as b, W as c, Nt as d, Se as et, qe as f, Je as g, Pt as h, Wt as i, ue as it, o as j, i as k, Y as l, Ot as m, Me as n, d as nt, Mt as o, Bt as p, x as q, Fe as r, ke as rt, U as s, qt as t, _e as tt, G as u, L as v, $ as w, q as x, Ft as y, Te as z };

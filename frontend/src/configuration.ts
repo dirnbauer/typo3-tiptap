@@ -19,6 +19,10 @@ export interface TipTapConfiguration {
   extensions: TipTapPluginOptions['extensions']
 }
 
+interface CreateConfigurationOptions {
+  uiMode?: 'toolbar' | 'balloon'
+}
+
 function createToolbarGroups(): TipTapMenuItem[] {
   return [
     {
@@ -67,6 +71,18 @@ function createToolbarGroups(): TipTapMenuItem[] {
 function createBubbleMenuGroups(): TipTapMenuItem[] {
   return [
     {
+      id: 'history',
+      commands: [],
+    },
+    {
+      id: 'styles',
+      commands: [],
+      dropdown: {
+        label: 'Styles',
+        iconIdentifier: 'styles',
+      },
+    },
+    {
       id: 'heading',
       commands: [],
       dropdown: {
@@ -79,16 +95,8 @@ function createBubbleMenuGroups(): TipTapMenuItem[] {
       commands: [],
     },
     {
-      id: 'table',
+      id: 'general',
       commands: [],
-    },
-    {
-      id: 'styles',
-      commands: [],
-      dropdown: {
-        label: 'Styles',
-        iconIdentifier: 'styles',
-      },
     },
     {
       id: 'textAlignment',
@@ -97,6 +105,14 @@ function createBubbleMenuGroups(): TipTapMenuItem[] {
         label: 'Text alignment',
         iconIdentifier: 'justify-left',
       },
+    },
+    {
+      id: 'table',
+      commands: [],
+    },
+    {
+      id: 'developer',
+      commands: [],
     },
   ]
 }
@@ -119,15 +135,16 @@ export function defineTipTapPlugin(unsafePluginOptions: TipTapPluginOptions): Ti
  * Create a fresh, isolated TipTap configuration from a list of plugin options.
  * Each editor instance should call this to avoid shared state between editors.
  */
-export function createConfiguration(pluginOptionsList: TipTapPluginOptions[]): TipTapConfiguration {
+export function createConfiguration(pluginOptionsList: TipTapPluginOptions[], options: CreateConfigurationOptions = {}): TipTapConfiguration {
   const toolbar = createToolbarGroups()
   const bubbleMenu = createBubbleMenuGroups()
   const extensions = pluginOptionsList.flatMap(p => p.extensions ?? [])
+  const bubbleOnly = options.uiMode === 'balloon'
 
   for (const pluginOptions of pluginOptionsList) {
     if (pluginOptions.commands) {
       for (const command of pluginOptions.commands) {
-        if (command.position.toolbarGroupId !== false) {
+        if (!bubbleOnly && command.position.toolbarGroupId !== false) {
           const toolbarGroup = toolbar.find(group => group.id === command.position.toolbarGroupId)
           if (!toolbarGroup) {
             throw new Error(`Top bar group ${command.position.toolbarGroupId} not found for command id ${command.id}.`)
@@ -135,10 +152,14 @@ export function createConfiguration(pluginOptionsList: TipTapPluginOptions[]): T
           toolbarGroup.commands.push(command)
         }
 
-        if (command.position.bubbleMenuGroupId !== false) {
-          const bubbleMenuGroup = bubbleMenu.find(group => group.id === command.position.bubbleMenuGroupId)
+        const bubbleMenuGroupId = command.position.bubbleMenuGroupId !== false
+          ? command.position.bubbleMenuGroupId
+          : (bubbleOnly ? getBalloonFallbackGroupId(command.position.toolbarGroupId) : false)
+
+        if (bubbleMenuGroupId !== false) {
+          const bubbleMenuGroup = bubbleMenu.find(group => group.id === bubbleMenuGroupId)
           if (!bubbleMenuGroup) {
-            throw new Error(`Bubble menu group ${command.position.bubbleMenuGroupId} not found for command id ${command.id}.`)
+            throw new Error(`Bubble menu group ${bubbleMenuGroupId} not found for command id ${command.id}.`)
           }
           bubbleMenuGroup.commands.push(command)
         }
@@ -147,6 +168,13 @@ export function createConfiguration(pluginOptionsList: TipTapPluginOptions[]): T
   }
 
   return { toolbar, bubbleMenu, extensions }
+}
+
+function getBalloonFallbackGroupId(toolbarGroupId: string | false): string | false {
+  if (toolbarGroupId === false)
+    return false
+
+  return toolbarGroupId
 }
 
 export function parseTipTapPluginYamlConfiguration<T extends zod.ZodTypeAny>(props: {

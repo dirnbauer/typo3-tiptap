@@ -1,4 +1,4 @@
-import { n as e } from "../configuration-BT9xaJ2A.js";
+import { n as e } from "../configuration-CTry3cSH.js";
 import { n as t } from "../dist-BpFqfqnc.js";
 //#region src/plugins/bold.ts
 function n() {

@@ -79,7 +79,7 @@ function buildAbbreviationContent(text: string, title: string): JSONContent {
  * This plugin adds support for semantic abbreviations with tooltip text.
  */
 export default function () {
-  defineTipTapPlugin({
+  return defineTipTapPlugin({
     extensions: [Abbreviation],
     commands: [
       {

@@ -1,4 +1,4 @@
-import { n as e } from "../configuration-BT9xaJ2A.js";
+import { n as e } from "../configuration-CTry3cSH.js";
 import { Gt as t, c as n } from "../dist-BppL3qHu.js";
 var r = n.create({
 	name: "superscript",

@@ -1,4 +1,4 @@
-import { n as e, r as t } from "../configuration-BT9xaJ2A.js";
+import { n as e, r as t } from "../configuration-CTry3cSH.js";
 import { n } from "../dist-23jRIzE5.js";
 //#region src/plugins/headings.ts
 function r(r) {

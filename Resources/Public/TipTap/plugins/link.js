@@ -1,4 +1,4 @@
-import { n as e } from "../configuration-BT9xaJ2A.js";
+import { n as e } from "../configuration-CTry3cSH.js";
 import { t } from "../dist-91yalACB.js";
 import { t as n } from "../dist-DMA-Qmgt.js";
 import r from "@typo3/backend/modal.js";

@@ -1,4 +1,4 @@
-import { n as e, r as t } from "../configuration-BT9xaJ2A.js";
+import { n as e, r as t } from "../configuration-CTry3cSH.js";
 import { t as n } from "../dist-BmtwYQ_m.js";
 //#region src/plugins/character-count.ts
 function r(r) {

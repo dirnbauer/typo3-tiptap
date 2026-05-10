@@ -52,6 +52,13 @@ const shouldShowBubbleMenu = computed(() => {
   return configuration.value.bubbleMenu.some(group => group.commands.length > 0)
 })
 
+const shouldShowToolbar = computed(() => {
+  if (options.uiMode === 'balloon')
+    return false
+
+  return configuration.value?.toolbar.some(group => group.commands.length > 0) ?? false
+})
+
 const availableStyles = computed(() => styles.filter(
   style => style.element.toLowerCase() === stylesParentNode.value?.tagName.toLowerCase(),
 ))
@@ -174,7 +181,7 @@ function getCommandIsVisible(command: TipTapPluginCommand) {
 
 onMounted(async () => {
   const pluginOptions = await importPluginFiles()
-  configuration.value = createConfiguration(pluginOptions)
+  configuration.value = createConfiguration(pluginOptions, { uiMode: options.uiMode })
 
   // wait for slot content to be rendered
   await nextTick()
@@ -243,6 +250,27 @@ onMounted(async () => {
 })
 
 onUnmounted(() => editor.value?.destroy())
+
+function getContent(): string {
+  return textareaRef.value?.value ?? ''
+}
+
+function setContent(content: string) {
+  if (textareaRef.value) {
+    textareaRef.value.value = content
+  }
+  editor.value?.commands.setContent(content)
+}
+
+function focus() {
+  editor.value?.commands.focus()
+}
+
+defineExpose({
+  focus,
+  getContent,
+  setContent,
+})
 </script>
 
 <template>
@@ -252,7 +280,7 @@ onUnmounted(() => editor.value?.destroy())
   >
     <!-- Command Bar -->
     <nav
-      v-if="configuration.toolbar.some(group => group.commands.length > 0)"
+      v-if="shouldShowToolbar"
       class="tiptap-toolbar"
     >
       <template

@@ -1,4 +1,4 @@
-import { n as e, r as t } from "../configuration-BT9xaJ2A.js";
+import { n as e, r as t } from "../configuration-CTry3cSH.js";
 import { Gt as n, Tn as r, V as i, Z as a, _ as o, i as s, u as c } from "../dist-BppL3qHu.js";
 import { _ as l, a as u, c as d, d as f, f as p, g as m, h, i as g, l as _, m as v, n as y, o as b, p as x, r as S, s as C, t as w, u as T } from "../tables-NWFOyHuO.js";
 //#region node_modules/@tiptap/extension-table/dist/index.js

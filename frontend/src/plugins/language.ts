@@ -58,7 +58,7 @@ const Language = Mark.create({
  * This plugin adds support for language spans on inline text selections.
  */
 export default function () {
-  defineTipTapPlugin({
+  return defineTipTapPlugin({
     extensions: [Language],
     commands: [
       {

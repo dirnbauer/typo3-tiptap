@@ -1,4 +1,4 @@
-import { n as e } from "../configuration-BT9xaJ2A.js";
+import { n as e } from "../configuration-CTry3cSH.js";
 //#region src/plugins/source.ts
 var t = "data-tiptap-source-view-active";
 function n(e) {

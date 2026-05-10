@@ -1,6 +1,7 @@
 editor:
   tiptap:
     config:
+      uiMode: toolbar
       enableContentDragAndDrop: true
 
       plugins:
