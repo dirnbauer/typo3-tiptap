@@ -34,6 +34,17 @@ This release targets TYPO3 v14 only. The backend integration forwards the curren
 
 TipTap fields work inside TYPO3 workspaces, but TYPO3's standard file handling limitation still applies: physical FAL files are not versioned per workspace. When editors prepare unpublished changes, they should upload new files instead of overwriting existing assets.
 
+## Rendering boundary
+
+This extension owns the backend RTE/FormEngine integration and small optional
+frontend CSS helpers for semantic rich-text output. It does not own page-layout
+templates and should not render TYPO3 content areas with `f:render.contentArea`
+or `f:mark.contentArea`.
+
+Project-specific Bootstrap 5.3 or shadcn/ui templates belong in the consuming
+sitepackage. TipTap should keep emitting semantic rich-text HTML that those
+sitepackage templates and CSS layers can style consistently.
+
 ## Configuration
 
 ### Understanding the Architecture

@@ -22,6 +22,18 @@ To use a project specific preset, register your own YAML file:
 
 The TipTap configuration lives below ``editor.tiptap.config`` and accepts plugin definitions and editor options such as ``contentCss``.
 
+Rendering boundary
+==================
+
+TYPO3 TipTap provides the backend RTE element, editor preset configuration, and
+optional CSS helpers for semantic rich-text output. It does not provide
+frontend page-layout templates and should not use Visual Editor page content
+ViewHelpers such as ``f:render.contentArea`` or ``f:mark.contentArea``.
+
+Bootstrap 5.3, shadcn/ui, and other project-specific frontend template systems
+belong in the consuming sitepackage. Keep TipTap focused on semantic editor
+output that those templates and CSS layers can style.
+
 Abbreviation plugin
 ===================
 
